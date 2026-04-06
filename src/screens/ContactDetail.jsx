@@ -128,7 +128,7 @@ export default function ContactDetail({ contact, onBack, onRefresh }) {
       <div className="flex-1 overflow-y-auto px-4 pb-8 pt-4 space-y-5">
 
         {/* Failed Mail fix banner */}
-        {contact['Failed Mail'] === 'Yes' && (
+        {contact['Failed Mail'] === 'Yes' && contact['Opted Out'] !== 'Yes' && (
           <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
             <p className="text-sm font-semibold text-orange-300 mb-1">Email delivery failed</p>
             <p className="text-xs text-slate-400 mb-3">Fix the email address below to re-queue this contact for the next send.</p>
