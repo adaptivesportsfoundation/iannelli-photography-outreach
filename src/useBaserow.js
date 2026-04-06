@@ -48,7 +48,7 @@ export function computeStats(contacts) {
   const total = contacts.length
 
   const pipelineToSend = contacts.filter(
-    (c) => c['Email#1 Body'] && !c['Email#1 Sent']
+    (c) => c['Email#1 Body'] && !c['Email#1 Sent'] && c['Failed Mail'] !== 'Yes'
   ).length
 
   const email1Sent = contacts.filter((c) => c['Email#1 Sent'] === 'Yes').length
@@ -56,6 +56,10 @@ export function computeStats(contacts) {
   const email3Sent = contacts.filter((c) => c['Email#3 Sent'] === 'Yes').length
   const replied = contacts.filter((c) => c['Replied'] === 'Yes').length
   const optedOut = contacts.filter((c) => c['Opted Out'] === 'Yes').length
+  const failedMail = contacts.filter((c) => c['Failed Mail'] === 'Yes').length
+  const failedAndSent = contacts.filter(
+    (c) => c['Failed Mail'] === 'Yes' && c['Email#1 Sent'] === 'Yes'
+  ).length
 
   const linkedin = contacts.filter(
     (c) => c['Lead Source']?.value?.toLowerCase() === 'linkedin'
@@ -64,8 +68,9 @@ export function computeStats(contacts) {
     (c) => c['Lead Source']?.value?.toLowerCase() === 'realtor'
   ).length
 
+  const deliveredSent = email1Sent - failedAndSent
   const replyRate =
-    email1Sent > 0 ? ((replied / email1Sent) * 100).toFixed(1) : '0.0'
+    deliveredSent > 0 ? ((replied / deliveredSent) * 100).toFixed(1) : '0.0'
 
   // industry breakdown
   const industries = {}
@@ -86,6 +91,7 @@ export function computeStats(contacts) {
     email3Sent,
     replied,
     optedOut,
+    failedMail,
     linkedin,
     realtor,
     replyRate,
@@ -95,6 +101,7 @@ export function computeStats(contacts) {
 }
 
 export function getContactStatus(c) {
+  if (c['Failed Mail'] === 'Yes') return 'Failed Mail'
   if (c['Opted Out'] === 'Yes') return 'Opted Out'
   if (c['Email#3 Sent'] === 'Yes') return 'E3 Sent'
   if (c['Email#2 Sent'] === 'Yes') return 'E2 Sent'

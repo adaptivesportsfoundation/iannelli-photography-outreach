@@ -21,7 +21,7 @@ export default function Contacts({ contacts, loading, error, onRefresh, onSelect
     }
   }, [savedScroll])
 
-  const STATUS_ORDER = { 'Ready': 0, 'E1 Sent': 1, 'E2 Sent': 2, 'E3 Sent': 3, 'No Email': 4, 'Opted Out': 5 }
+  const STATUS_ORDER = { 'Ready': 0, 'E1 Sent': 1, 'E2 Sent': 2, 'E3 Sent': 3, 'No Email': 4, 'Opted Out': 5, 'Failed Mail': 6 }
 
   const filtered = useMemo(() => {
     let list = [...contacts]

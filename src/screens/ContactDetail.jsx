@@ -127,6 +127,7 @@ export default function ContactDetail({ contact, onBack }) {
             <StatusRow label="Email 3 Sent" value={contact['Email#3 Sent']} />
             <StatusRow label="Replied" value={contact['Replied']} />
             <StatusRow label="Opted Out" value={contact['Opted Out']} />
+            <StatusRow label="Failed Mail" value={contact['Failed Mail']} />
           </div>
         </section>
 

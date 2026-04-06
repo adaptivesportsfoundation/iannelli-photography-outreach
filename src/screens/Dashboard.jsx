@@ -73,14 +73,18 @@ export default function Dashboard({ contacts, loading, error, onRefresh }) {
       </div>
 
       {/* Big numbers */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="bg-[#1a1d27] rounded-xl p-4 border border-[#2a2d3a] text-center">
           <p className="text-4xl font-black text-red-400">{stats.optedOut}</p>
           <p className="text-xs text-slate-400 mt-1 font-medium uppercase tracking-wide">Opt Outs</p>
         </div>
+        <div className="bg-[#1a1d27] rounded-xl p-4 border border-orange-500/20 text-center">
+          <p className="text-4xl font-black text-orange-400">{stats.failedMail}</p>
+          <p className="text-xs text-slate-400 mt-1 font-medium uppercase tracking-wide">Failed Mail</p>
+        </div>
         <div className="bg-[#1a1d27] rounded-xl p-4 border border-[#2a2d3a] text-center">
           <p className="text-4xl font-black text-white">{stats.total}</p>
-          <p className="text-xs text-slate-400 mt-1 font-medium uppercase tracking-wide">Total Contacts</p>
+          <p className="text-xs text-slate-400 mt-1 font-medium uppercase tracking-wide">Total</p>
         </div>
       </div>
 
