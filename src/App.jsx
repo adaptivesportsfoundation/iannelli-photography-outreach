@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useBaserow } from './useBaserow'
 import BottomNav from './components/BottomNav'
+import PinGate from './components/PinGate'
 import Dashboard from './screens/Dashboard'
 import Contacts from './screens/Contacts'
 import ContactDetail from './screens/ContactDetail'
 import Replies from './screens/Replies'
+import OptOuts from './screens/OptOuts'
 import Settings from './screens/Settings'
 
 export default function App() {
@@ -38,6 +40,7 @@ export default function App() {
   const sharedProps = { contacts, loading, error, onRefresh: refresh, lastFetched }
 
   return (
+    <PinGate>
     <div className="flex flex-col h-full max-w-lg mx-auto bg-[#0f1117] relative">
       <div className="flex flex-col flex-1 overflow-hidden pb-[56px]">
         {screen === 'dashboard' && (
@@ -60,6 +63,12 @@ export default function App() {
             onSelectContact={(c) => handleSelectContact(c, 'replies')}
           />
         )}
+        {screen === 'optouts' && (
+          <OptOuts
+            {...sharedProps}
+            onSelectContact={(c) => handleSelectContact(c, 'optouts')}
+          />
+        )}
         {screen === 'settings' && (
           <Settings {...sharedProps} />
         )}
@@ -70,5 +79,6 @@ export default function App() {
         onNavigate={handleNavigate}
       />
     </div>
+    </PinGate>
   )
 }

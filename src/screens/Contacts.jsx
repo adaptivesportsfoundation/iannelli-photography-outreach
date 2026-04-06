@@ -7,6 +7,7 @@ import Spinner from '../components/Spinner'
 export default function Contacts({ contacts, loading, error, onRefresh, onSelectContact, savedScroll, onSaveScroll }) {
   const [filter, setFilter] = useState('All')
   const [search, setSearch] = useState('')
+  const [sort, setSort] = useState('status')
   const listRef = useRef(null)
 
   useEffect(() => {
@@ -20,8 +21,18 @@ export default function Contacts({ contacts, loading, error, onRefresh, onSelect
     }
   }, [savedScroll])
 
+  const STATUS_ORDER = { 'Ready': 0, 'E1 Sent': 1, 'E2 Sent': 2, 'E3 Sent': 3, 'No Email': 4, 'Opted Out': 5 }
+
   const filtered = useMemo(() => {
-    let list = [...contacts].sort((a, b) => b.id - a.id)
+    let list = [...contacts]
+
+    if (sort === 'status') {
+      list.sort((a, b) => (STATUS_ORDER[getContactStatus(a)] ?? 9) - (STATUS_ORDER[getContactStatus(b)] ?? 9))
+    } else if (sort === 'alpha') {
+      list.sort((a, b) => (a['Last Name'] || '').localeCompare(b['Last Name'] || ''))
+    } else {
+      list.sort((a, b) => b.id - a.id)
+    }
 
     if (filter === 'LinkedIn') {
       list = list.filter((c) => c['Lead Source']?.value?.toLowerCase() === 'linkedin')
@@ -77,6 +88,24 @@ export default function Contacts({ contacts, loading, error, onRefresh, onSelect
               }`}
             >
               {f}
+            </button>
+          ))}
+        </div>
+
+        {/* Sort */}
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs text-slate-500 shrink-0">Sort:</span>
+          {[{ key: 'status', label: 'By Status' }, { key: 'alpha', label: 'A–Z' }, { key: 'newest', label: 'Newest' }].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setSort(key)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors min-h-[30px] ${
+                sort === key
+                  ? 'bg-blue-600 border-blue-500 text-white'
+                  : 'bg-[#1a1d27] border-[#2a2d3a] text-slate-400 active:bg-[#2a2d3a]'
+              }`}
+            >
+              {label}
             </button>
           ))}
         </div>

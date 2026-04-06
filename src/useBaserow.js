@@ -15,7 +15,7 @@ async function fetchAllRows() {
     if (!res.ok) throw new Error(`Baserow error: ${res.status}`)
     const data = await res.json()
     allRows = allRows.concat(data.results)
-    nextUrl = data.next
+    nextUrl = data.next ? data.next.replace('http://', 'https://') : null
   }
 
   return allRows

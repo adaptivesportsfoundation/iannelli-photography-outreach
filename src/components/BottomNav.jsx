@@ -34,6 +34,16 @@ export default function BottomNav({ active, onNavigate }) {
       ),
     },
     {
+      id: 'optouts',
+      label: 'Opt Outs',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
+          <circle cx="12" cy="12" r="9" />
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+        </svg>
+      ),
+    },
+    {
       id: 'settings',
       label: 'Settings',
       icon: (

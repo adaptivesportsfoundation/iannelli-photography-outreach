@@ -22,7 +22,10 @@ function ExpandableEmail({ label, body }) {
       </button>
       {open && (
         <div className="px-4 py-3 bg-[#1a1d27] border-t border-[#2a2d3a]">
-          <p className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">{body}</p>
+          <div
+            className="text-sm text-slate-300 leading-relaxed [&_a]:text-blue-400 [&_a]:underline [&_img]:max-w-full [&_img]:rounded"
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
         </div>
       )}
     </div>
