@@ -55,7 +55,7 @@ export default function App() {
           />
         )}
         {screen === 'detail' && (
-          <ContactDetail contact={selectedContact} onBack={handleBackFromDetail} />
+          <ContactDetail contact={selectedContact} onBack={handleBackFromDetail} onRefresh={refresh} />
         )}
         {screen === 'replies' && (
           <Replies

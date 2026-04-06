@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import StatusPill from '../components/StatusPill'
 import LeadSourcePill from '../components/LeadSourcePill'
-import { getContactStatus } from '../useBaserow'
+import { getContactStatus, updateContact } from '../useBaserow'
 
 function ExpandableEmail({ label, body }) {
   const [open, setOpen] = useState(false)
@@ -60,10 +60,41 @@ function StatusRow({ label, value }) {
   )
 }
 
-export default function ContactDetail({ contact, onBack }) {
+export default function ContactDetail({ contact, onBack, onRefresh }) {
+  const [editingEmail, setEditingEmail] = useState(false)
+  const [emailValue, setEmailValue] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+
   if (!contact) return null
   const status = getContactStatus(contact)
   const leadSource = contact['Lead Source']
+
+  const handleFixEmail = () => {
+    setEmailValue(contact['Email Address'] || '')
+    setSaveError(null)
+    setEditingEmail(true)
+  }
+
+  const handleSaveEmail = async () => {
+    if (!emailValue.trim()) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await updateContact(contact.id, {
+        'Email Address': emailValue.trim(),
+        'Email#1 Sent': '',
+        'Failed Mail': '',
+      })
+      setEditingEmail(false)
+      onRefresh()
+      onBack()
+    } catch (err) {
+      setSaveError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
@@ -95,6 +126,50 @@ export default function ContactDetail({ contact, onBack }) {
 
       {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto px-4 pb-8 pt-4 space-y-5">
+
+        {/* Failed Mail fix banner */}
+        {contact['Failed Mail'] === 'Yes' && (
+          <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
+            <p className="text-sm font-semibold text-orange-300 mb-1">Email delivery failed</p>
+            <p className="text-xs text-slate-400 mb-3">Fix the email address below to re-queue this contact for the next send.</p>
+            {editingEmail ? (
+              <div className="space-y-2">
+                <input
+                  type="email"
+                  value={emailValue}
+                  onChange={(e) => setEmailValue(e.target.value)}
+                  placeholder="corrected@email.com"
+                  className="w-full bg-[#1a1d27] border border-orange-500/40 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-400 min-h-[44px]"
+                  autoFocus
+                />
+                {saveError && <p className="text-xs text-red-400">{saveError}</p>}
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveEmail}
+                    disabled={saving || !emailValue.trim()}
+                    className="flex-1 bg-orange-500 text-white text-sm font-semibold py-2.5 rounded-lg min-h-[44px] disabled:opacity-50 active:bg-orange-600 transition-colors"
+                  >
+                    {saving ? 'Saving…' : 'Save & Re-queue'}
+                  </button>
+                  <button
+                    onClick={() => setEditingEmail(false)}
+                    disabled={saving}
+                    className="px-4 bg-[#1a1d27] border border-[#2a2d3a] text-slate-400 text-sm font-semibold py-2.5 rounded-lg min-h-[44px] active:bg-[#2a2d3a] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={handleFixEmail}
+                className="w-full bg-orange-500/20 border border-orange-500/40 text-orange-300 text-sm font-semibold py-2.5 rounded-lg min-h-[44px] active:bg-orange-500/30 transition-colors"
+              >
+                Fix Email Address
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Outreach section */}
         <section>
