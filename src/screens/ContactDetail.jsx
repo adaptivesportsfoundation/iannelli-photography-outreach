@@ -84,6 +84,8 @@ export default function ContactDetail({ contact, onBack, onRefresh }) {
       await updateContact(contact.id, {
         'Email Address': emailValue.trim(),
         'Email#1 Sent': '',
+        'Email#2 Sent': '',
+        'Email#3 Sent': '',
         'Failed Mail': '',
       })
       setEditingEmail(false)

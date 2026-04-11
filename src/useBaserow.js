@@ -4,6 +4,15 @@ const TABLE_ID = '912031'
 const BASE_URL = `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/`
 const TOKEN = import.meta.env.VITE_BASEROW_TOKEN
 
+export async function deleteContact(rowId) {
+  const url = `${BASE_URL}${rowId}/`
+  const res = await fetch(url, {
+    method: 'DELETE',
+    headers: { Authorization: `Token ${TOKEN}` },
+  })
+  if (!res.ok) throw new Error(`Baserow error: ${res.status}`)
+}
+
 export async function updateContact(rowId, fields) {
   const url = `${BASE_URL}${rowId}/?user_field_names=true`
   const res = await fetch(url, {

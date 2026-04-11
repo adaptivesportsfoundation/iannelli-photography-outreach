@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { getContactStatus, hasSmukm } from '../useBaserow'
+import { getContactStatus, hasSmukm, deleteContact } from '../useBaserow'
 import StatusPill from '../components/StatusPill'
 import LeadSourcePill from '../components/LeadSourcePill'
 import Spinner from '../components/Spinner'
@@ -8,6 +8,8 @@ export default function Contacts({ contacts, loading, error, onRefresh, onSelect
   const [filter, setFilter] = useState('All')
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState('status')
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
   const listRef = useRef(null)
 
   useEffect(() => {
@@ -58,6 +60,28 @@ export default function Contacts({ contacts, loading, error, onRefresh, onSelect
   const handleCardClick = (contact) => {
     if (listRef.current) onSaveScroll(listRef.current.scrollTop)
     onSelectContact(contact)
+  }
+
+  const handleDeletePress = (e, contactId) => {
+    e.stopPropagation()
+    setConfirmDeleteId(contactId)
+  }
+
+  const handleDeleteCancel = (e) => {
+    e.stopPropagation()
+    setConfirmDeleteId(null)
+  }
+
+  const handleDeleteConfirm = async (e, contactId) => {
+    e.stopPropagation()
+    setDeletingId(contactId)
+    setConfirmDeleteId(null)
+    try {
+      await deleteContact(contactId)
+      onRefresh()
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   // pull-to-refresh
@@ -149,33 +173,74 @@ export default function Contacts({ contacts, loading, error, onRefresh, onSelect
           {filtered.map((contact) => {
             const status = getContactStatus(contact)
             const smukm = hasSmukm(contact)
+            const isConfirming = confirmDeleteId === contact.id
+            const isDeleting = deletingId === contact.id
             return (
-              <button
-                key={contact.id}
-                onClick={() => handleCardClick(contact)}
-                className="w-full text-left bg-[#1a1d27] rounded-xl p-4 border border-[#2a2d3a] active:border-blue-500/50 active:bg-[#1e2130] transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2 mb-1.5">
-                  <div className="min-w-0">
-                    <p className="text-base font-semibold text-white truncate">
-                      {contact['First Name']} {contact['Last Name']}
-                      {smukm && (
-                        <span className="ml-1.5 text-yellow-400 text-sm" title="SMUKM subject line">★</span>
-                      )}
-                    </p>
-                    {contact['Company Name'] && (
-                      <p className="text-sm text-slate-400 truncate">{contact['Company Name']}</p>
-                    )}
-                    {contact['Job Title'] && (
-                      <p className="text-xs text-slate-500 truncate">{contact['Job Title']}</p>
-                    )}
+              <div key={contact.id} className="relative">
+                <button
+                  onClick={() => handleCardClick(contact)}
+                  className="w-full text-left bg-[#1a1d27] rounded-xl p-4 border border-[#2a2d3a] active:border-blue-500/50 active:bg-[#1e2130] transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <div className="min-w-0">
+                      <p className="text-base font-semibold text-white truncate">
+                        {contact['First Name']} {contact['Last Name']}
+                        {smukm ? (
+                          <span className="ml-1.5 text-yellow-400 text-sm" title="SMUKM subject line">★</span>
+                        ) : null}
+                      </p>
+                      {contact['Company Name'] ? (
+                        <p className="text-sm text-slate-400 truncate">{contact['Company Name']}</p>
+                      ) : null}
+                      {contact['Job Title'] ? (
+                        <p className="text-xs text-slate-500 truncate">{contact['Job Title']}</p>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <LeadSourcePill source={contact['Lead Source']} />
+                      <StatusPill status={status} />
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <LeadSourcePill source={contact['Lead Source']} />
-                    <StatusPill status={status} />
-                  </div>
-                </div>
-              </button>
+                  {filter === 'Failed Mail' ? (
+                    isConfirming ? (
+                      <div className="mt-2 flex gap-2" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={(e) => handleDeleteConfirm(e, contact.id)}
+                          className="flex-1 bg-red-600 text-white text-xs font-semibold py-2 rounded-lg min-h-[36px] active:bg-red-700 transition-colors"
+                        >
+                          Yes, Delete
+                        </button>
+                        <button
+                          onClick={handleDeleteCancel}
+                          className="flex-1 bg-[#2a2d3a] text-slate-300 text-xs font-semibold py-2 rounded-lg min-h-[36px] active:bg-[#343848] transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-2 flex justify-end">
+                        <button
+                          onClick={(e) => handleDeletePress(e, contact.id)}
+                          disabled={isDeleting}
+                          className="flex items-center gap-1.5 text-xs text-red-400 font-semibold px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 min-h-[36px] active:bg-red-500/20 transition-colors disabled:opacity-50"
+                        >
+                          {isDeleting ? 'Deleting…' : (
+                            <>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                                <path d="M10 11v6M14 11v6" />
+                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                              </svg>
+                              Delete
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )
+                  ) : null}
+                </button>
+              </div>
             )
           })}
         </div>
