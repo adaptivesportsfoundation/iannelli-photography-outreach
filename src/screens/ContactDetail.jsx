@@ -87,6 +87,7 @@ export default function ContactDetail({ contact, onBack, onRefresh }) {
         'Email#2 Sent': '',
         'Email#3 Sent': '',
         'Failed Mail': '',
+        'Replied': '',
       })
       setEditingEmail(false)
       onRefresh()
