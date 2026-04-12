@@ -87,6 +87,9 @@ export function computeStats(contacts) {
   const linkedin = contacts.filter(
     (c) => c['Lead Source']?.value?.toLowerCase() === 'linkedin'
   ).length
+  const linkedinPhotoLead = contacts.filter(
+    (c) => c['Lead Source']?.value?.toLowerCase() === 'linkedin photo lead'
+  ).length
   const realtor = contacts.filter(
     (c) => c['Lead Source']?.value?.toLowerCase() === 'realtor'
   ).length
@@ -116,6 +119,7 @@ export function computeStats(contacts) {
     optedOut,
     failedMail,
     linkedin,
+    linkedinPhotoLead,
     realtor,
     replyRate,
     industries,

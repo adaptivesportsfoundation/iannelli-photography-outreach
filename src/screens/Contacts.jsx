@@ -38,6 +38,8 @@ export default function Contacts({ contacts, loading, error, onRefresh, onSelect
 
     if (filter === 'LinkedIn') {
       list = list.filter((c) => c['Lead Source']?.value?.toLowerCase() === 'linkedin')
+    } else if (filter === 'LinkedIn Photo Lead') {
+      list = list.filter((c) => c['Lead Source']?.value?.toLowerCase() === 'linkedin photo lead')
     } else if (filter === 'Realtor') {
       list = list.filter((c) => c['Lead Source']?.value?.toLowerCase() === 'realtor')
     } else if (filter === 'Failed Mail') {
@@ -103,7 +105,7 @@ export default function Contacts({ contacts, loading, error, onRefresh, onSelect
 
         {/* Filter pills */}
         <div className="flex gap-2 mb-3 flex-wrap">
-          {['All', 'LinkedIn', 'Realtor', 'Failed Mail'].map((f) => (
+          {['All', 'LinkedIn', 'LinkedIn Photo Lead', 'Realtor', 'Failed Mail'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}

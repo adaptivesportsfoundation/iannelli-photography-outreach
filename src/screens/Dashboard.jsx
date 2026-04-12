@@ -91,12 +91,19 @@ export default function Dashboard({ contacts, loading, error, onRefresh }) {
       {/* Lead source breakdown */}
       <div className="bg-[#1a1d27] rounded-xl p-4 border border-[#2a2d3a] mb-5">
         <p className="text-xs text-slate-400 font-medium uppercase tracking-wide mb-3">Lead Source</p>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <div className="flex-1 flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-lg px-3 py-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-orange-400 shrink-0" />
             <div>
               <p className="text-lg font-bold text-orange-300">{stats.linkedin}</p>
               <p className="text-xs text-slate-400">LinkedIn</p>
+            </div>
+          </div>
+          <div className="flex-1 flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-400 shrink-0" />
+            <div>
+              <p className="text-lg font-bold text-blue-300">{stats.linkedinPhotoLead}</p>
+              <p className="text-xs text-slate-400">LI Photo Lead</p>
             </div>
           </div>
           <div className="flex-1 flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2.5">
