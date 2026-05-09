@@ -1,61 +1,13 @@
 import { useEffect, useState } from 'react'
-import { computeStats, getWeekStart, formatWeekLabel, filterContactsByWeek } from '../useBaserow'
+import { computeStats, getWeekStart, filterContactsByWeek } from '../useBaserow'
 import Spinner from '../components/Spinner'
+import ViewToggle from '../components/ViewToggle'
 
 function StatCard({ label, value, color = 'text-white' }) {
   return (
     <div className="bg-[#1a1d27] rounded-xl p-4 border border-[#2a2d3a] flex flex-col gap-1">
       <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">{label}</span>
       <span className={`text-3xl font-bold ${color}`}>{value}</span>
-    </div>
-  )
-}
-
-function ViewToggle({ showingAll, weekStart, onSelectAll, onSelectWeek, onPrev, onNext }) {
-  return (
-    <div className="mb-5 space-y-2">
-      {/* Segmented control */}
-      <div className="flex bg-[#1a1d27] rounded-xl border border-[#2a2d3a] p-1 gap-1">
-        <button
-          onClick={onSelectAll}
-          className={`flex-1 text-sm font-semibold py-2 rounded-lg transition-colors min-h-[36px] ${
-            showingAll
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-400 active:bg-[#2a2d3a]'
-          }`}
-        >
-          All Time
-        </button>
-        <button
-          onClick={onSelectWeek}
-          className={`flex-1 text-sm font-semibold py-2 rounded-lg transition-colors min-h-[36px] ${
-            !showingAll
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-400 active:bg-[#2a2d3a]'
-          }`}
-        >
-          By Week
-        </button>
-      </div>
-
-      {/* Week navigation — only shown in week mode */}
-      {!showingAll && (
-        <div className="flex items-center bg-[#1a1d27] rounded-xl border border-[#2a2d3a] px-2 py-1">
-          <button onClick={onPrev} className="p-2 text-slate-400 min-h-[40px] min-w-[40px] flex items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <span className="flex-1 text-center text-sm font-semibold text-white">
-            {formatWeekLabel(weekStart)}
-          </span>
-          <button onClick={onNext} className="p-2 text-slate-400 min-h-[40px] min-w-[40px] flex items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        </div>
-      )}
     </div>
   )
 }

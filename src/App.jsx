@@ -6,6 +6,7 @@ import Dashboard from './screens/Dashboard'
 import Contacts from './screens/Contacts'
 import ContactDetail from './screens/ContactDetail'
 import Replies from './screens/Replies'
+import Analysis from './screens/Analysis'
 import OptOuts from './screens/OptOuts'
 import Settings from './screens/Settings'
 
@@ -68,6 +69,9 @@ export default function App() {
             {...sharedProps}
             onSelectContact={(c) => handleSelectContact(c, 'optouts')}
           />
+        )}
+        {screen === 'analysis' && (
+          <Analysis {...sharedProps} />
         )}
         {screen === 'settings' && (
           <Settings {...sharedProps} />

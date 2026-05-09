@@ -127,6 +127,54 @@ export function computeStats(contacts) {
   }
 }
 
+export function computeAnalysis(contacts) {
+  const email1Sent = contacts.filter((c) => c['Email#1 Sent'] === 'Yes').length
+  const failedAndSent = contacts.filter(
+    (c) => c['Failed Mail'] === 'Yes' && c['Email#1 Sent'] === 'Yes'
+  ).length
+  const delivered = email1Sent - failedAndSent
+  const optedOut = contacts.filter((c) => c['Opted Out'] === 'Yes').length
+  const replied = contacts.filter((c) => c['Replied'] === 'Yes').length
+
+  const optOutRate = delivered > 0 ? ((optedOut / delivered) * 100).toFixed(1) : '0.0'
+  const replyRate = delivered > 0 ? ((replied / delivered) * 100).toFixed(1) : '0.0'
+
+  // Delivered and opt-outs by lead source (normalize to lowercase keys)
+  const deliveredBySource = {}
+  const optOutBySource = {}
+  contacts.forEach((c) => {
+    const source = (c['Lead Source']?.value || 'Unknown').toLowerCase()
+    if (c['Email#1 Sent'] === 'Yes' && c['Failed Mail'] !== 'Yes') {
+      deliveredBySource[source] = (deliveredBySource[source] || 0) + 1
+    }
+    if (c['Opted Out'] === 'Yes') {
+      optOutBySource[source] = (optOutBySource[source] || 0) + 1
+    }
+  })
+
+  // Opt-outs by industry (sorted by count desc)
+  const optOutByIndustry = {}
+  contacts.forEach((c) => {
+    if (c['Opted Out'] === 'Yes') {
+      const ind = c['Industry'] || 'Unknown'
+      optOutByIndustry[ind] = (optOutByIndustry[ind] || 0) + 1
+    }
+  })
+  const industryRows = Object.entries(optOutByIndustry)
+    .sort((a, b) => b[1] - a[1])
+
+  return {
+    delivered,
+    optedOut,
+    replied,
+    optOutRate,
+    replyRate,
+    deliveredBySource,
+    optOutBySource,
+    industryRows,
+  }
+}
+
 export function getWeekStart(date) {
   const d = new Date(date)
   const day = d.getDay()
