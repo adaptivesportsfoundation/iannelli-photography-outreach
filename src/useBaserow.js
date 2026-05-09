@@ -153,7 +153,7 @@ export function filterContactsByWeek(contacts, weekStart) {
   if (!weekStart) return contacts
   const weekEnd = getWeekEnd(weekStart)
   return contacts.filter((c) => {
-    const raw = c.created_on || c['Date Added'] || c['Created']
+    const raw = c['Created on'] || c.created_on || c['Date Added'] || c['Created']
     if (!raw) return false
     const d = new Date(raw)
     return d >= weekStart && d <= weekEnd
