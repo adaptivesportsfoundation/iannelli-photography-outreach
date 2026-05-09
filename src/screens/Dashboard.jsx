@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { computeStats } from '../useBaserow'
+import { useEffect, useState } from 'react'
+import { computeStats, getWeekStart, formatWeekLabel, filterContactsByWeek } from '../useBaserow'
 import Spinner from '../components/Spinner'
 
 function StatCard({ label, value, color = 'text-white' }) {
@@ -11,12 +11,42 @@ function StatCard({ label, value, color = 'text-white' }) {
   )
 }
 
+function WeekPicker({ weekStart, onPrev, onNext, onAll }) {
+  return (
+    <div className="flex items-center gap-2 bg-[#1a1d27] rounded-xl border border-[#2a2d3a] px-3 py-2 mb-5">
+      <button
+        onClick={onAll}
+        className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-600/20 text-blue-300 border border-blue-500/30 min-h-[32px] shrink-0"
+      >
+        All
+      </button>
+      <button onClick={onPrev} className="p-1.5 text-slate-400 min-h-[32px] min-w-[32px] flex items-center justify-center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+      <span className="flex-1 text-center text-sm font-medium text-white">
+        {formatWeekLabel(weekStart)}
+      </span>
+      <button onClick={onNext} className="p-1.5 text-slate-400 min-h-[32px] min-w-[32px] flex items-center justify-center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
 export default function Dashboard({ contacts, loading, error, onRefresh }) {
+  const [selectedWeekStart, setSelectedWeekStart] = useState(() => getWeekStart(new Date()))
+  const [showingAll, setShowingAll] = useState(false)
+
   useEffect(() => {
     if (contacts.length === 0 && !loading) onRefresh()
   }, [])
 
-  const stats = computeStats(contacts)
+  const filteredContacts = showingAll ? contacts : filterContactsByWeek(contacts, selectedWeekStart)
+  const stats = computeStats(filteredContacts)
 
   if (loading && contacts.length === 0) {
     return (
@@ -36,6 +66,15 @@ export default function Dashboard({ contacts, loading, error, onRefresh }) {
         </button>
       </div>
     )
+  }
+
+  const shiftWeek = (delta) => {
+    setShowingAll(false)
+    setSelectedWeekStart((prev) => {
+      const d = new Date(prev)
+      d.setDate(d.getDate() + delta * 7)
+      return d
+    })
   }
 
   return (
@@ -61,6 +100,26 @@ export default function Dashboard({ contacts, loading, error, onRefresh }) {
           </button>
         )}
       </div>
+
+      {/* Week picker */}
+      {showingAll ? (
+        <div className="flex items-center justify-between bg-[#1a1d27] rounded-xl border border-[#2a2d3a] px-3 py-2 mb-5">
+          <span className="text-sm font-medium text-white flex-1 text-center">All Time</span>
+          <button
+            onClick={() => setShowingAll(false)}
+            className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#2a2d3a] text-slate-300 border border-[#3a3d4a] min-h-[32px] shrink-0"
+          >
+            By Week
+          </button>
+        </div>
+      ) : (
+        <WeekPicker
+          weekStart={selectedWeekStart}
+          onPrev={() => shiftWeek(-1)}
+          onNext={() => shiftWeek(1)}
+          onAll={() => setShowingAll(true)}
+        />
+      )}
 
       {/* 6 stat cards — 2 columns */}
       <div className="grid grid-cols-2 gap-3 mb-5">

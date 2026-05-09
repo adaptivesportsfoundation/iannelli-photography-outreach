@@ -127,6 +127,39 @@ export function computeStats(contacts) {
   }
 }
 
+export function getWeekStart(date) {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() + diff)
+  return d
+}
+
+export function getWeekEnd(weekStart) {
+  const d = new Date(weekStart)
+  d.setDate(d.getDate() + 6)
+  d.setHours(23, 59, 59, 999)
+  return d
+}
+
+export function formatWeekLabel(weekStart) {
+  const weekEnd = getWeekEnd(weekStart)
+  const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return `${fmt(weekStart)} – ${fmt(weekEnd)}`
+}
+
+export function filterContactsByWeek(contacts, weekStart) {
+  if (!weekStart) return contacts
+  const weekEnd = getWeekEnd(weekStart)
+  return contacts.filter((c) => {
+    const raw = c.created_on || c['Date Added'] || c['Created']
+    if (!raw) return false
+    const d = new Date(raw)
+    return d >= weekStart && d <= weekEnd
+  })
+}
+
 export function getContactStatus(c) {
   if (c['Failed Mail'] === 'Yes') return 'Failed Mail'
   if (c['Opted Out'] === 'Yes') return 'Opted Out'
