@@ -197,13 +197,22 @@ export function formatWeekLabel(weekStart) {
   return `${fmt(weekStart)} – ${fmt(weekEnd)}`
 }
 
+function parseLocalDate(str) {
+  // Date-only strings like "2026-05-11" are parsed as UTC midnight by JS,
+  // which shifts them to the previous evening in EST/EDT. Parse as local
+  // midnight so the date stays on the correct calendar day.
+  const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3])
+  return new Date(str)
+}
+
 export function filterContactsByWeek(contacts, weekStart) {
   if (!weekStart) return contacts
   const weekEnd = getWeekEnd(weekStart)
   return contacts.filter((c) => {
     const raw = c['Sequence Started On']
     if (!raw) return false
-    const d = new Date(raw)
+    const d = parseLocalDate(raw)
     return d >= weekStart && d <= weekEnd
   })
 }
