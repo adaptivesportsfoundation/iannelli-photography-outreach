@@ -124,7 +124,7 @@ export default function Replies({ contacts, loading, error, onRefresh, onSelectC
               {contact['show_replies'] && (
                 <div className="bg-[#13151f] rounded-lg px-3 py-2.5 mb-3 border border-[#2a2d3a]">
                   <p className="text-xs text-slate-500 mb-1">Their reply</p>
-                  <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">
+                  <p className="text-sm text-slate-300 leading-relaxed">
                     {contact['show_replies']}
                   </p>
                 </div>
