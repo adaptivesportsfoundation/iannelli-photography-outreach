@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { computeStats, getWeekStart, filterContactsByWeek } from '../useBaserow'
+import { computeStats, getWeekStart, filterContactsByWeek, getWeeklyProgressStat } from '../useBaserow'
 import Spinner from '../components/Spinner'
 import ViewToggle from '../components/ViewToggle'
 
@@ -22,6 +22,7 @@ export default function Dashboard({ contacts, loading, error, onRefresh }) {
 
   const filteredContacts = showingAll ? contacts : filterContactsByWeek(contacts, selectedWeekStart)
   const stats = computeStats(filteredContacts)
+  const weeklyProgress = !showingAll ? getWeeklyProgressStat(filteredContacts, selectedWeekStart) : null
 
   if (loading && contacts.length === 0) {
     return (
@@ -88,7 +89,10 @@ export default function Dashboard({ contacts, loading, error, onRefresh }) {
 
       {/* 6 stat cards — 2 columns */}
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <StatCard label="Pipeline to Send" value={stats.pipelineToSend} color="text-yellow-300" />
+        {showingAll
+          ? <StatCard label="Pipeline to Send" value={stats.pipelineToSend} color="text-yellow-300" />
+          : <StatCard label={weeklyProgress.label} value={weeklyProgress.value} color={weeklyProgress.color} />
+        }
         <StatCard label="Email 1 Sent" value={stats.email1Sent} color="text-blue-300" />
         <StatCard label="Email 2 Sent" value={stats.email2Sent} color="text-purple-300" />
         <StatCard label="Email 3 Sent" value={stats.email3Sent} color="text-indigo-300" />
