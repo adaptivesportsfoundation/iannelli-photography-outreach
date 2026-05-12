@@ -205,27 +205,30 @@ export function getWeeklyProgressStat(contacts, weekStart) {
   const e2Sent = contacts.filter((c) => c['Email#2 Sent'] === 'Yes').length
   const e3Sent = contacts.filter((c) => c['Email#3 Sent'] === 'Yes').length
 
-  // Opt-outs bucketed by which email they received last
-  const optAfterE1 = contacts.filter(
-    (c) => c['Opted Out'] === 'Yes' && c['Email#1 Sent'] === 'Yes' && c['Email#2 Sent'] !== 'Yes'
+  // Contacts removed from sequence after each email (opted out OR replied)
+  const removedAfterE1 = contacts.filter(
+    (c) => c['Email#1 Sent'] === 'Yes' && c['Email#2 Sent'] !== 'Yes' &&
+      (c['Opted Out'] === 'Yes' || c['Replied'] === 'Yes')
   ).length
-  const optAfterE2 = contacts.filter(
-    (c) => c['Opted Out'] === 'Yes' && c['Email#2 Sent'] === 'Yes' && c['Email#3 Sent'] !== 'Yes'
+  const removedAfterE2 = contacts.filter(
+    (c) => c['Email#2 Sent'] === 'Yes' && c['Email#3 Sent'] !== 'Yes' &&
+      (c['Opted Out'] === 'Yes' || c['Replied'] === 'Yes')
   ).length
-  const optAfterE3 = contacts.filter(
-    (c) => c['Opted Out'] === 'Yes' && c['Email#3 Sent'] === 'Yes'
+  const removedAfterE3 = contacts.filter(
+    (c) => c['Email#3 Sent'] === 'Yes' &&
+      (c['Opted Out'] === 'Yes' || c['Replied'] === 'Yes')
   ).length
 
-  const completed = { label: 'Sequence Complete', value: e3Sent - optAfterE3, color: 'text-green-300' }
+  const completed = { label: 'Sequence Complete', value: e3Sent - removedAfterE3, color: 'text-green-300' }
 
   if (!isCurrentWeek) return completed
 
   const day = new Date().getDay() // 0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat
-  if (day === 1) return { label: 'Email 1 Sent',      value: e1Sent,                color: 'text-blue-300' }
-  if (day === 2) return { label: 'Ready for Email 2', value: e1Sent - optAfterE1,   color: 'text-yellow-300' }
-  if (day === 3) return { label: 'Email 2 Sent',      value: e2Sent,                color: 'text-purple-300' }
-  if (day === 4) return { label: 'Ready for Email 3', value: e2Sent - optAfterE2,   color: 'text-yellow-300' }
-  if (day === 5) return { label: 'Email 3 Sent',      value: e3Sent,                color: 'text-indigo-300' }
+  if (day === 1) return { label: 'Email 1 Sent',      value: e1Sent,                    color: 'text-blue-300' }
+  if (day === 2) return { label: 'Ready for Email 2', value: e1Sent - removedAfterE1,   color: 'text-yellow-300' }
+  if (day === 3) return { label: 'Email 2 Sent',      value: e2Sent,                    color: 'text-purple-300' }
+  if (day === 4) return { label: 'Ready for Email 3', value: e2Sent - removedAfterE2,   color: 'text-yellow-300' }
+  if (day === 5) return { label: 'Email 3 Sent',      value: e3Sent,                    color: 'text-indigo-300' }
   return completed // Sat (6) or Sun (0)
 }
 
