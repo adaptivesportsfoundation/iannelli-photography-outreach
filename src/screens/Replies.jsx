@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { computeStats } from '../useBaserow'
+import { useEffect, useRef, useState } from 'react'
+import { computeStats, updateContact } from '../useBaserow'
 import LeadSourcePill from '../components/LeadSourcePill'
 import Spinner from '../components/Spinner'
 
@@ -8,10 +8,34 @@ export default function Replies({ contacts, loading, error, onRefresh, onSelectC
     if (contacts.length === 0 && !loading) onRefresh()
   }, [])
 
+  const [starOverrides, setStarOverrides] = useState({})
+
   const stats = computeStats(contacts)
+
   const replies = [...contacts]
     .filter((c) => c['Replied'] === 'Yes')
-    .sort((a, b) => b.id - a.id)
+    .map((c) => {
+      const serverStarred = (c['star for followup'] ?? 0) >= 1
+      const starred = starOverrides[c.id] !== undefined ? starOverrides[c.id] : serverStarred
+      return { ...c, _starred: starred }
+    })
+    .sort((a, b) => {
+      if (a._starred && !b._starred) return -1
+      if (!a._starred && b._starred) return 1
+      return b.id - a.id
+    })
+
+  const toReplyCount = replies.filter((c) => c._starred).length
+
+  const handleToggleStar = async (contact) => {
+    const next = !contact._starred
+    setStarOverrides((prev) => ({ ...prev, [contact.id]: next }))
+    try {
+      await updateContact(contact.id, { 'star for followup': next ? 1 : 0 })
+    } catch {
+      setStarOverrides((prev) => ({ ...prev, [contact.id]: contact._starred }))
+    }
+  }
 
   const touchStartY = useRef(0)
   const listRef = useRef(null)
@@ -37,6 +61,12 @@ export default function Replies({ contacts, loading, error, onRefresh, onSelectC
             <span className="text-2xl font-black text-green-300">{stats.replyRate}%</span>
             <span className="text-xs text-slate-400 ml-1.5">reply rate</span>
           </div>
+          {toReplyCount > 0 && (
+            <div>
+              <span className="text-2xl font-black text-yellow-400">{toReplyCount}</span>
+              <span className="text-xs text-slate-400 ml-1.5">to reply</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -60,10 +90,12 @@ export default function Replies({ contacts, loading, error, onRefresh, onSelectC
           {replies.map((contact) => (
             <div
               key={contact.id}
-              className="bg-[#1a1d27] rounded-xl p-4 border border-green-500/20"
+              className={`bg-[#1a1d27] rounded-xl p-4 border ${
+                contact._starred ? 'border-yellow-500/40' : 'border-green-500/20'
+              }`}
             >
               <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-base font-semibold text-white truncate">
                     {contact['First Name']} {contact['Last Name']}
                   </p>
@@ -71,11 +103,33 @@ export default function Replies({ contacts, loading, error, onRefresh, onSelectC
                     <p className="text-sm text-slate-400 truncate">{contact['Company Name']}</p>
                   )}
                 </div>
-                <LeadSourcePill source={contact['Lead Source']} />
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => handleToggleStar(contact)}
+                    className={`text-2xl leading-none min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors ${
+                      contact._starred ? 'text-yellow-400' : 'text-slate-600 active:text-yellow-300'
+                    }`}
+                    aria-label={contact._starred ? 'Remove reply flag' : 'Flag to reply'}
+                  >
+                    {contact._starred ? '★' : '☆'}
+                  </button>
+                  <LeadSourcePill source={contact['Lead Source']} />
+                </div>
               </div>
+
               {contact['Email#1 Subject'] && (
                 <p className="text-xs text-slate-500 mb-2 truncate">Subject: {contact['Email#1 Subject']}</p>
               )}
+
+              {contact['show_replies'] && (
+                <div className="bg-[#13151f] rounded-lg px-3 py-2.5 mb-3 border border-[#2a2d3a]">
+                  <p className="text-xs text-slate-500 mb-1">Their reply</p>
+                  <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">
+                    {contact['show_replies']}
+                  </p>
+                </div>
+              )}
+
               <button
                 onClick={() => onSelectContact(contact)}
                 className="w-full mt-1 bg-green-500/10 border border-green-500/30 text-green-400 text-sm font-semibold py-2 rounded-lg min-h-[44px] active:bg-green-500/20 transition-colors"
